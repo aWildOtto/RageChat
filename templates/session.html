@@ -19,6 +19,8 @@
 	<div class="camera">
 		<video id="video">Video stream not available.</video>
 		<button id="startbutton">Take photo</button>
+		<button id="stopbutton">Stop taking photo</button>
+
 	</div>
 	<canvas id="canvas">
 		<div class="output">
@@ -83,12 +85,14 @@
 				var canvas = null;
 				var photo = null;
 				var startbutton = null;
+				var stopbutton = null;
 
 				function startup() {
 					video = document.getElementById('video');
 					canvas = document.getElementById('canvas');
 					photo = document.getElementById('photo');
 					startbutton = document.getElementById('startbutton');
+					stopbutton = document.getElementById('stopbutton');
 
 					navigator.mediaDevices.getUserMedia({ video: true, audio: false })
 						.then(function (stream) {
@@ -125,6 +129,13 @@
 						ev.preventDefault();
 					}, false);
 
+					stopbutton.addEventListener('click', function (ev) {
+						stopChat();
+						console.log(ev);
+						startbutton.disabled = false;
+						ev.preventDefault();
+					}, false);
+
 					clearphoto();
 				}
 
@@ -145,9 +156,15 @@
 				// format data URL. By drawing it on an offscreen canvas and then
 				// drawing that to the screen, we can change its size and/or apply
 				// other changes before drawing it.
+				var intervalId = null;
 
 				function startChat() {
-					setInterval(takepicture, 5000);
+					intervalId = setInterval(takepicture, 5000);
+				}
+				function stopChat(){
+					if (intervalId !== null){
+					clearInterval(intervalId);
+					}
 				}
 				function takepicture() {
 					var context = canvas.getContext('2d');
