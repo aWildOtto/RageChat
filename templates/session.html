@@ -31,12 +31,18 @@
 				<img id="photo" alt="The screen capture will appear in this box.">
 			</div>
 		</canvas>
-		<img id="emotion" height="200px" src="/static/sad.jpg" alt="emotion placeholder">
+    <img id="emotion" height="200px" src="/static/sad.jpg" alt="emotion placeholder">
+    <div id="controls">
+      <button id="recordButton">Press to record</button>
+    </div>
 	</div>
 	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+  <script src="https://cdn.rawgit.com/mattdiamond/Recorderjs/08e7abd9/dist/recorder.js"></script>
+
 	<script>
+
 		// The width and height of the captured photo. We will set the
 		// width to the value defined here, but the height will be
 		// calculated based on the aspect ratio of the input stream.
@@ -165,12 +171,12 @@
 		var form = $('form').on('submit', function (e) {
 			e.preventDefault()
 
-			username = $('input.username').val()
-			let room = $('input.room').val()
+			username = $('input.username').val();
+			let room = $('input.room').val();
 			socket.emit('join', {
 				username,
 				room
-			})
+			});
 
 			socket.on('photo result', function (msg) {
 				console.log(msg)
@@ -189,7 +195,7 @@
 		});
 
 	</script>
-
+  <script src="/static/record.js"></script>
 </body>
 
 </html>
