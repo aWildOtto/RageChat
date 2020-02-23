@@ -31,19 +31,19 @@
       <div class="row">
         <div class="camera" >
           <video id="video" hidden>Video stream not available.</video>
-          <button class="btn btn-secondary m2" id="startbutton">Start chat</button>
-          <button class="btn btn-secondary m2" id="stopbutton">Stop chat</button>
+          <button class="btn btn-secondary m-2" id="startbutton">Start chat</button>
+          <button class="btn btn-secondary m-2" id="stopbutton">Stop chat</button>
         </div>
       </div>
+		<h2 id="user1"></h2>
       <div class="row">
-
         <canvas id="canvas" height="100px">
           <div class="output">
             <img id="photo" alt="The screen capture will appear in this box.">
           </div>
         </canvas>
       </div>
-
+	<h2 id="user2"></h2>
       <div class="row">
 
         <img id="emotion" height="300px" src="/static/sad.jpg" alt="emotion placeholder">
@@ -51,7 +51,7 @@
       </div>
       <div class="row">
         <div id="controls">
-          <button class="btn btn-primary m2" id="recordButton">Press to record</button>
+          <button class="btn btn-primary m-2" id="recordButton">Press to record</button>
         </div>
       </div>
       <div class="row">
@@ -71,6 +71,7 @@
 		// width to the value defined here, but the height will be
 		// calculated based on the aspect ratio of the input stream.
 		var username = "";
+		var opponent = "";
 		var currentEmotion = null;
 		var emotion = $('#emotion')[0];
 		var width = 320;    // We will scale the photo width to this
@@ -97,6 +98,9 @@
 			startbutton = document.getElementById('startbutton');
 			stopbutton = document.getElementById('stopbutton');
       		startbutton.disabled = true;
+			var userText = $('#user1')[0];
+			userText.innerText = username + "\n";
+
 
 			navigator.mediaDevices.getUserMedia({ video: true, audio: false })
 				.then(function (stream) {
@@ -207,9 +211,11 @@
 			socket.on('photo result', function (msg) {
 				console.log(msg)
 				if (msg.username !== username){
-          if (!msg.emotion) {
-            msg.emotion = "Neutral"
-          }
+					var userText2 = $('#user2')[0];
+					userText2.innerText = msg.username + '\n';
+					if (!msg.emotion) {
+						msg.emotion = "Neutral"
+					}
 					currentEmotion = '/static/resized_'+ msg.emotion.toLowerCase() + '.png';
 					emotion.src = currentEmotion;
 				}
