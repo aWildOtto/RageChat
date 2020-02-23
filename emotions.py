@@ -63,6 +63,5 @@ def tell_emotion(photo):
         roi_gray = gray[y:y + h, x:x + w]
         cropped_img = np.expand_dims(np.expand_dims(cv2.resize(roi_gray, (48, 48)), -1), 0)
         prediction = model.predict(cropped_img)
-        maxindex = int(np.argmax(prediction
-        
+        maxindex = int(np.argmax(prediction))
         return emotion_dict[maxindex]
