@@ -37,10 +37,10 @@ def on_leave(data):
 def handle_photo_event(photo, methods=['GET', 'POST']):
     print("received photo")
     # print(photo)
-    emotions.tell_emotion(photo)
+    emotion = emotions.tell_emotion(photo)
 		# photo is based64 blob, decode and do emotion detection
 		# do emotion detection
-    socketio.emit('photo result', "angry")
+    socketio.emit('photo result', emotion)
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
