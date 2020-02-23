@@ -26,11 +26,13 @@
 			<button id="startbutton">Take photo</button>
 			<button id="stopbutton">Stop taking photo</button>
 		</div>
-		<canvas id="canvas">
+		<canvas id="canvas" height="100">
 			<div class="output">
 				<img id="photo" alt="The screen capture will appear in this box.">
 			</div>
 		</canvas>
+		<img id="emotion" src="/static/sad.jpg" alt="emotion placeholder">
+
 
 	</div>
 	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
@@ -40,6 +42,7 @@
 		// The width and height of the captured photo. We will set the
 		// width to the value defined here, but the height will be
 		// calculated based on the aspect ratio of the input stream.
+		var username = null;
 
 		var width = 320;    // We will scale the photo width to this
 		var height = 0;     // This will be computed based on the input stream
@@ -56,16 +59,15 @@
 		var canvas = null;
 		var photo = null;
 		var startbutton = null;
-		function stopChat(){
-					if (intervalId !== null){
-					clearInterval(intervalId);
-					}
-				}
+		var stopbutton = null;
+
 		function startup() {
 			video = document.getElementById('video');
 			canvas = document.getElementById('canvas');
 			photo = document.getElementById('photo');
 			startbutton = document.getElementById('startbutton');
+			stopbutton = document.getElementById('stopbutton');
+
 
 			navigator.mediaDevices.getUserMedia({ video: true, audio: false })
 				.then(function (stream) {
@@ -102,6 +104,13 @@
 				ev.preventDefault();
 			}, false);
 
+			stopbutton.addEventListener('click', function (ev) {
+				stopChat();
+				console.log(ev);
+				startbutton.disabled = false;
+				ev.preventDefault();
+			}, false);
+
 			clearphoto();
 		}
 
@@ -122,10 +131,17 @@
 		// format data URL. By drawing it on an offscreen canvas and then
 		// drawing that to the screen, we can change its size and/or apply
 		// other changes before drawing it.
+		var intervalId = null;
 
 		function startChat() {
 			startup();
-			setInterval(takepicture, 5000);
+			intervalId = setInterval(takepicture, 5000);
+		}
+
+		function stopChat(){
+			if (intervalId !== null){
+			clearInterval(intervalId);
+			}
 		}
 		function takepicture() {
 			var context = canvas.getContext('2d');
@@ -136,7 +152,7 @@
 
 				var data = canvas.toDataURL('image/png');
 				photo.setAttribute('src', data);
-				socket.emit('photo', { image: true, buffer: data.toString('base64') });
+				socket.emit('photo', { image: true, buffer: data.toString('base64'), username: username});
 			} else {
 				clearphoto();
 			}
@@ -158,8 +174,11 @@
 
 			socket.on('photo result', function (msg) {
 				console.log(msg)
-				if (typeof msg.user_name !== 'undefined') {
+				if (typeof msg.username !== 'undefined') {
 					$('div.message_holder').append('<div><b style="color: #000">' + msg.type + '</b> ' + msg.content + '</div>')
+				}
+				if (msg.username !== username){
+					console.log('cool');
 				}
 			});
 			socket.on('message', function (msg) {
