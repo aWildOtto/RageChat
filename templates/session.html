@@ -21,8 +21,8 @@
 
 
 	<div id="chatUI" hidden>
-		<div class="camera">
-			<video id="video">Video stream not available.</video>
+		<div class="camera" >
+			<video id="video" hidden>Video stream not available.</video>
 			<button id="startbutton">Take photo</button>
 			<button id="stopbutton">Stop taking photo</button>
 		</div>
@@ -31,9 +31,7 @@
 				<img id="photo" alt="The screen capture will appear in this box.">
 			</div>
 		</canvas>
-		<img id="emotion" src="/static/sad.jpg" alt="emotion placeholder">
-
-
+		<img id="emotion" height="200px" src="/static/sad.jpg" alt="emotion placeholder">
 	</div>
 	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
@@ -42,8 +40,9 @@
 		// The width and height of the captured photo. We will set the
 		// width to the value defined here, but the height will be
 		// calculated based on the aspect ratio of the input stream.
-		var username = null;
-
+		var username = "";
+		var currentEmotion = null;
+		var emotion = $('#emotion')[0];
 		var width = 320;    // We will scale the photo width to this
 		var height = 0;     // This will be computed based on the input stream
 
@@ -152,7 +151,7 @@
 
 				var data = canvas.toDataURL('image/png');
 				photo.setAttribute('src', data);
-				socket.emit('photo', { image: true, buffer: data.toString('base64'), username: username});
+				socket.emit('photo', { image: true, photo: data.toString('base64'), username: username});
 			} else {
 				clearphoto();
 			}
@@ -162,10 +161,11 @@
 	<script type="text/javascript">
 		var socket = io.connect('http://' + document.domain + ':' + location.port);
 		var chatUI = $('#chatUI')[0];
+		var username;
 		var form = $('form').on('submit', function (e) {
 			e.preventDefault()
 
-			let username = $('input.username').val()
+			username = $('input.username').val()
 			let room = $('input.room').val()
 			socket.emit('join', {
 				username,
@@ -174,11 +174,9 @@
 
 			socket.on('photo result', function (msg) {
 				console.log(msg)
-				if (typeof msg.username !== 'undefined') {
-					$('div.message_holder').append('<div><b style="color: #000">' + msg.type + '</b> ' + msg.content + '</div>')
-				}
 				if (msg.username !== username){
-					console.log('cool');
+					currentEmotion = '/static/resized_'+ msg.emotion.toLowerCase() + '.png';
+					emotion.src = currentEmotion;
 				}
 			});
 			socket.on('message', function (msg) {

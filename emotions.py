@@ -47,7 +47,7 @@ def tell_emotion(photo):
     # dictionary which assigns each label an emotion (alphabetical order)
     emotion_dict = {0: "Angry", 1: "Disgusted", 2: "Fearful", 3: "Happy", 4: "Neutral", 5: "Sad", 6: "Surprised"}
 
-    decoded = base64.b64decode(photo['buffer'][22:])
+    decoded = base64.b64decode(photo[22:])
     img = imread(io.BytesIO(decoded))
 
     frame = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
