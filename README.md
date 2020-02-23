@@ -5,6 +5,7 @@ An awesome video chat app that doesn't really do video chat.
 - laptop webcam is enabled
 - client snaps a screenshot every 3 seconds and sends it to the server
 - server does image recognition on the photo and detects the emotion of the user
+- Instead of seeing the users' video feed, we show them a picture of rage face coorisponding their emotions
 - user can also press record audio button to send an audio to their friend
 - the audio is processed with a speech to text process
 - the user gets the text result from their speech
