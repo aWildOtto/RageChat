@@ -1,8 +1,14 @@
 import speech_recognition as sr
 import pyttsx3
 import wave
+from gtts import gTTS
+import os
+import io
+import base64
 
 def audiototext(audioin):
+
+    """
     nchannels = 1
     sampwidth = 1
     framerate = 8000
@@ -17,10 +23,19 @@ def audiototext(audioin):
 
     blob = open(audioin).read()  # such as `blob.read()`
     audio.writeframes(blob)
+    """
+
+
+    print()
+    decoded = base64.b64decode(audioin[22:])
+    decoded = io.BytesIO(decoded)
+    print("DECODEDE0")
+    print(decoded)
+
 
     # obtain audio from the microphone
     r = sr.Recognizer()
-    with sr.AudioFile(audio) as source:
+    with sr.AudioFile(decoded) as source:
         r.adjust_for_ambient_noise(source)
 
         print("start listening")
@@ -32,11 +47,17 @@ def audiototext(audioin):
         #print("[You said]: " + r.recognize_google(audio))
         print(str(result))
 
+        """
+        speech = gTTS(text = str(result), lang = 'en', slow = False)
+        speech.save("text.wav")
+        
+
         engine = pyttsx3.init()
         print("1")
         engine.say(result)
         print("2")
         engine.runAndWait()
+        """
 
     except sr.UnknownValueError:
         print("Ooops! Could not understand audio")
