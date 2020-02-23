@@ -50,7 +50,14 @@ window.onload = function() {
 
   function sendToServer(blob) {
     console.log(blob);
-    socket.emit('audio',  { audio: blob, username});
+
+    var reader = new FileReader();
+    reader.readAsDataURL(blob);
+    reader.onloadend = function() {
+      var base64data = reader.result;
+      console.log(base64data);
+      socket.emit('audio',  { audio: base64data, username});
+    }
   }
 
 

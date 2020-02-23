@@ -1,6 +1,7 @@
 from flask import Flask, render_template
 from flask_socketio import SocketIO, join_room, leave_room
 import emotions
+import voicetest
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'vnkdjnfjknfl1232#'
@@ -24,7 +25,7 @@ def on_join(data):
     username = data['username']
     room = data['room']
     join_room(room)
-    socketio.send({	"type": "Connection", "content": username + ' has entered the room ' + room}, room=room)
+    socketio.send({	"type": "Connection:", "content": username + ' has entered the room ' + room}, room=room)
 
 @socketio.on('leave')
 def on_leave(data):
@@ -45,11 +46,13 @@ def handle_photo_event(data, methods=['GET', 'POST']):
 
 @socketio.on('audio')
 def handle_audio_event(data, methods=['GET', 'POST']):
-    print("received audio ", data['username'])
+    print("received audio from ", data['username'])
+    print(data['audio'])
+    text = voicetest.audiototext(data['audio'])
     # TODO: do audio processing here
-    newAudio = data["audio"] # this should be computer generated voice
-    text = "David sucks ass" # this should be NLP text
-    socketio.emit('audio result', {"username": data['username'], "audio": newAudio, "text": text })
+    #newAudio = data["audio"] # this should be computer generated voice
+    #text = "David sucks ass" # this should be NLP text
+    socketio.emit('audio result', {"username": data['username'], "audio": data['audio'], "text": text })
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
