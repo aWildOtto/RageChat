@@ -2,14 +2,14 @@
 <html lang="en">
 
 <head>
-  <title>Definitely a video chat app</title>
+  <title>RageChat</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
 </head>
 
 <body>
+	<h1>RageChat</h1>
   <div class="container">
-
     <div class="message_holder"></div>
 
     <div id="welcome" class="jumbotron">
@@ -26,32 +26,31 @@
       </form>
     </div>
 
-
     <div id="chatUI" class="jumbotron" hidden>
       <div class="row">
         <div class="camera" >
           <video id="video" hidden>Video stream not available.</video>
-          <button class="btn btn-secondary" id="startbutton">Start chat</button>
-          <button class="btn btn-secondary" id="stopbutton">Stop chat</button>
+          <button class="btn btn-secondary m-2" id="startbutton">Start chat</button>
+          <button class="btn btn-secondary m-2" id="stopbutton">Stop chat</button>
         </div>
       </div>
+		<h2 id="user1"></h2>
       <div class="row">
-
-        <canvas id="canvas" height="100px">
+        <canvas id="canvas" height="50px">
           <div class="output">
             <img id="photo" alt="The screen capture will appear in this box.">
           </div>
         </canvas>
       </div>
-
+	<h2 id="user2"></h2>
       <div class="row">
 
         <img id="emotion" height="300px" src="/static/sad.jpg" alt="emotion placeholder">
-
+		<p id="subtitle"></p> 
       </div>
       <div class="row">
         <div id="controls">
-          <button class="btn btn-primary" id="recordButton">Press to record</button>
+          <button class="btn btn-primary m-2" id="recordButton">Press to record</button>
         </div>
       </div>
       <div class="row">
@@ -71,6 +70,7 @@
 		// width to the value defined here, but the height will be
 		// calculated based on the aspect ratio of the input stream.
 		var username = "";
+		var opponent = "";
 		var currentEmotion = null;
 		var emotion = $('#emotion')[0];
 		var width = 320;    // We will scale the photo width to this
@@ -96,7 +96,10 @@
 			photo = document.getElementById('photo');
 			startbutton = document.getElementById('startbutton');
 			stopbutton = document.getElementById('stopbutton');
-      startbutton.disabled = true;
+      		startbutton.disabled = true;
+			var userText = $('#user1')[0];
+			userText.innerText = username + "\n";
+
 
 			navigator.mediaDevices.getUserMedia({ video: true, audio: false })
 				.then(function (stream) {
@@ -191,8 +194,8 @@
 
 	<script type="text/javascript">
 		var socket = io.connect('http://' + document.domain + ':' + location.port);
-    var chatUI = $('#chatUI')[0];
-    var welcome = $('#welcome')[0];
+    	var chatUI = $('#chatUI')[0];
+    	var welcome = $('#welcome')[0];
 		var username;
 		var form = $('form').on('submit', function (e) {
 			e.preventDefault()
@@ -207,9 +210,11 @@
 			socket.on('photo result', function (msg) {
 				console.log(msg)
 				if (msg.username !== username){
-          if (!msg.emotion) {
-            msg.emotion = "Neutral"
-          }
+					var userText2 = $('#user2')[0];
+					userText2.innerText = msg.username + '\n';
+					if (!msg.emotion) {
+						msg.emotion = "Neutral"
+					}
 					currentEmotion = '/static/resized_'+ msg.emotion.toLowerCase() + '.png';
 					emotion.src = currentEmotion;
 				}
@@ -217,27 +222,29 @@
 			socket.on('audio result', function (data) {
 				console.log(data)
 				if (data.username !== username){
-          var li = document.createElement('li');
-          var au = document.createElement('audio');
-          var p = document.createElement('p');
-          //add controls to the <audio> element
-          au.controls = true;
-          au.src = data.audio;
-          p.innerText = data.text;
-          //add the new audio and a elements to the li element
-          li.appendChild(au);
-          li.appendChild(p)
-          $('#audio-list')[0].appendChild(li);
+					var li = document.createElement('li');
+					var au = document.createElement('audio');
+					var p = document.createElement('p');
+					var subtitle = $('#subtitle')[0];
+					//add controls to the <audio> element 
+					au.controls = true;
+					au.src = data.audio;
+					p.innerText = data.text;
+					subtitle.innerText = data.text;
+					//add the new audio and a elements to the li element 
+					li.appendChild(au);
+					li.appendChild(p)
+					$('#audio-list')[0].appendChild(li);
 				}
 			});
 			socket.on('message', function (msg) {
 				console.log(msg)
-        $('div.message_holder').append('<div><b style="color: #000">' + msg.type + '</b> ' + msg.content + '</div>')
+				$('div.message_holder').append('<div><b style="color: #000">' + msg.type + '</b> ' + msg.content + '</div>')
 			});
 			welcome.hidden = true;
 			chatUI.hidden = false;
 			startChat();
-		});
+			});
 
 	</script>
   <script src="/static/record.js"></script>
