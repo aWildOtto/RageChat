@@ -2,189 +2,174 @@
 <html lang="en">
 
 <head>
-	<title>Flask_Chat_App</title>
+	<title>Definitely a video chat app</title>
 </head>
 
 <body>
 
-	<h3 style='color: #ccc;font-size: 30px;'>No message yet..</h3>
 	<div class="message_holder"></div>
 
-	<form action="" method="POST">
-		<input type="text" class="username" placeholder="User Name" />
-		<input type="text" class="message" placeholder="Messages" />
-		<input type="submit" />
-	</form>
+	<div id="welcome">
 
-	<div class="camera">
-		<video id="video">Video stream not available.</video>
-		<button id="startbutton">Take photo</button>
-		<button id="stopbutton">Stop taking photo</button>
+		<form action="" method="POST">
+			<h1>Definitely a legit video chat app</h1>
+			<input type="text" class="username" placeholder="User Name" />
+			<input type="text" class="room" placeholder="room" />
+			<input type="submit" />
+		</form>
+	</div>
+
+
+	<div id="chatUI" hidden>
+		<div class="camera">
+			<video id="video">Video stream not available.</video>
+			<button id="startbutton">Take photo</button>
+			<button id="stopbutton">Stop taking photo</button>
+		</div>
+		<canvas id="canvas">
+			<div class="output">
+				<img id="photo" alt="The screen capture will appear in this box.">
+			</div>
+		</canvas>
 
 	</div>
-	<canvas id="canvas">
-		<div class="output">
-			<img id="photo" alt="The screen capture will appear in this box.">
-		</div>
-	</canvas>
-
 	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
-	<script type="text/javascript">
-		var socket = io.connect('http://' + document.domain + ':' + location.port);
-
-		socket.on('connect', function () {
-			socket.emit('message', {
-				data: 'User Connected'
-			})
-			var form = $('form').on('submit', function (e) {
-				e.preventDefault()
-				let user_name = $('input.username').val()
-				let user_input = $('input.message').val()
-				socket.emit('message', {
-					user_name: user_name,
-					message: user_input
-				})
-				$('input.message').val('').focus()
-			})
-		})
-		socket.on('my response', function (msg) {
-			console.log(msg)
-			if (typeof msg.user_name !== 'undefined') {
-				$('h3').remove()
-				$('div.message_holder').append('<div><b style="color: #000">' + msg.user_name + '</b> ' + msg.message + '</div>')
-			}
-		})
-		socket.on('photo result', function (msg) {
-			console.log(msg)
-			if (typeof msg.user_name !== 'undefined') {
-				$('h3').remove()
-				$('div.message_holder').append('<div><b style="color: #000">' + msg.user_name + '</b> ' + msg.message + '</div>')
-			}
-		})
-	</script>
 	<script>
-			(function () {
-				// The width and height of the captured photo. We will set the
-				// width to the value defined here, but the height will be
-				// calculated based on the aspect ratio of the input stream.
+		// The width and height of the captured photo. We will set the
+		// width to the value defined here, but the height will be
+		// calculated based on the aspect ratio of the input stream.
 
-				var width = 320;    // We will scale the photo width to this
-				var height = 0;     // This will be computed based on the input stream
+		var width = 320;    // We will scale the photo width to this
+		var height = 0;     // This will be computed based on the input stream
 
-				// |streaming| indicates whether or not we're currently streaming
-				// video from the camera. Obviously, we start at false.
+		// |streaming| indicates whether or not we're currently streaming
+		// video from the camera. Obviously, we start at false.
 
-				var streaming = false;
+		var streaming = false;
 
-				// The various HTML elements we need to configure or control. These
-				// will be set by the startup() function.
+		// The various HTML elements we need to configure or control. These
+		// will be set by the startup() function.
 
-				var video = null;
-				var canvas = null;
-				var photo = null;
-				var startbutton = null;
-				var stopbutton = null;
-
-				function startup() {
-					video = document.getElementById('video');
-					canvas = document.getElementById('canvas');
-					photo = document.getElementById('photo');
-					startbutton = document.getElementById('startbutton');
-					stopbutton = document.getElementById('stopbutton');
-
-					navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-						.then(function (stream) {
-							video.srcObject = stream;
-							video.play();
-						})
-						.catch(function (err) {
-							console.log("An error occurred: " + err);
-						});
-
-					video.addEventListener('canplay', function (ev) {
-						if (!streaming) {
-							height = video.videoHeight / (video.videoWidth / width);
-
-							// Firefox currently has a bug where the height can't be read from
-							// the video, so we will make assumptions if this happens.
-
-							if (isNaN(height)) {
-								height = width / (4 / 3);
-							}
-
-							video.setAttribute('width', width);
-							video.setAttribute('height', height);
-							canvas.setAttribute('width', width);
-							canvas.setAttribute('height', height);
-							streaming = true;
-						}
-					}, false);
-
-					startbutton.addEventListener('click', function (ev) {
-						startChat();
-						console.log(ev);
-						startbutton.disabled = true;
-						ev.preventDefault();
-					}, false);
-
-					stopbutton.addEventListener('click', function (ev) {
-						stopChat();
-						console.log(ev);
-						startbutton.disabled = false;
-						ev.preventDefault();
-					}, false);
-
-					clearphoto();
-				}
-
-				// Fill the photo with an indication that none has been
-				// captured.
-
-				function clearphoto() {
-					var context = canvas.getContext('2d');
-					context.fillStyle = "#AAA";
-					context.fillRect(0, 0, canvas.width, canvas.height);
-
-					var data = canvas.toDataURL('image/png');
-					photo.setAttribute('src', data);
-				}
-
-				// Capture a photo by fetching the current contents of the video
-				// and drawing it into a canvas, then converting that to a PNG
-				// format data URL. By drawing it on an offscreen canvas and then
-				// drawing that to the screen, we can change its size and/or apply
-				// other changes before drawing it.
-				var intervalId = null;
-
-				function startChat() {
-					intervalId = setInterval(takepicture, 5000);
-				}
-				function stopChat(){
+		var video = null;
+		var canvas = null;
+		var photo = null;
+		var startbutton = null;
+		function stopChat(){
 					if (intervalId !== null){
 					clearInterval(intervalId);
 					}
 				}
-				function takepicture() {
-					var context = canvas.getContext('2d');
-					if (width && height) {
-						canvas.width = width;
-						canvas.height = height;
-						context.drawImage(video, 0, 0, width, height);
+		function startup() {
+			video = document.getElementById('video');
+			canvas = document.getElementById('canvas');
+			photo = document.getElementById('photo');
+			startbutton = document.getElementById('startbutton');
 
-						var data = canvas.toDataURL('image/png');
-						photo.setAttribute('src', data);
-						socket.emit('photo', { image: true, buffer: data.toString('base64') });
-					} else {
-						clearphoto();
+			navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+				.then(function (stream) {
+					video.srcObject = stream;
+					video.play();
+				})
+				.catch(function (err) {
+					console.log("An error occurred: " + err);
+				});
+
+			video.addEventListener('canplay', function (ev) {
+				if (!streaming) {
+					height = video.videoHeight / (video.videoWidth / width);
+
+					// Firefox currently has a bug where the height can't be read from
+					// the video, so we will make assumptions if this happens.
+
+					if (isNaN(height)) {
+						height = width / (4 / 3);
 					}
-				}
 
-				// Set up our event listener to run the startup process
-				// once loading is complete.
-				window.addEventListener('load', startup, false);
-			})();
+					video.setAttribute('width', width);
+					video.setAttribute('height', height);
+					canvas.setAttribute('width', width);
+					canvas.setAttribute('height', height);
+					streaming = true;
+				}
+			}, false);
+
+			startbutton.addEventListener('click', function (ev) {
+				startChat();
+				console.log(ev);
+				startbutton.disabled = true;
+				ev.preventDefault();
+			}, false);
+
+			clearphoto();
+		}
+
+		// Fill the photo with an indication that none has been
+		// captured.
+
+		function clearphoto() {
+			var context = canvas.getContext('2d');
+			context.fillStyle = "#AAA";
+			context.fillRect(0, 0, canvas.width, canvas.height);
+
+			var data = canvas.toDataURL('image/png');
+			photo.setAttribute('src', data);
+		}
+
+		// Capture a photo by fetching the current contents of the video
+		// and drawing it into a canvas, then converting that to a PNG
+		// format data URL. By drawing it on an offscreen canvas and then
+		// drawing that to the screen, we can change its size and/or apply
+		// other changes before drawing it.
+
+		function startChat() {
+			startup();
+			setInterval(takepicture, 5000);
+		}
+		function takepicture() {
+			var context = canvas.getContext('2d');
+			if (width && height) {
+				canvas.width = width;
+				canvas.height = height;
+				context.drawImage(video, 0, 0, width, height);
+
+				var data = canvas.toDataURL('image/png');
+				photo.setAttribute('src', data);
+				socket.emit('photo', { image: true, buffer: data.toString('base64') });
+			} else {
+				clearphoto();
+			}
+		}
+	</script>
+
+	<script type="text/javascript">
+		var socket = io.connect('http://' + document.domain + ':' + location.port);
+		var chatUI = $('#chatUI')[0];
+		var form = $('form').on('submit', function (e) {
+			e.preventDefault()
+
+			let username = $('input.username').val()
+			let room = $('input.room').val()
+			socket.emit('join', {
+				username,
+				room
+			})
+
+			socket.on('photo result', function (msg) {
+				console.log(msg)
+				if (typeof msg.user_name !== 'undefined') {
+					$('div.message_holder').append('<div><b style="color: #000">' + msg.type + '</b> ' + msg.content + '</div>')
+				}
+			});
+			socket.on('message', function (msg) {
+				console.log(msg)
+				$('div.message_holder').append('<div><b style="color: #000">' + msg.type + '</b> ' + msg.content + '</div>')
+			});
+			this.hidden = true;
+			chatUI.hidden = false;
+			startup();
+		});
 
 	</script>
 

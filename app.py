@@ -24,7 +24,7 @@ def on_join(data):
     username = data['username']
     room = data['room']
     join_room(room)
-    socketio.send(username + ' has entered the room.', room=room)
+    socketio.send({	"type": "User Join", "content": username + ' has entered the room.'}, room=room)
 
 @socketio.on('leave')
 def on_leave(data):
