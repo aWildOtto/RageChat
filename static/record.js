@@ -42,13 +42,35 @@ function stopRecording() {
   rec.stop(); //stop microphone access 
   gumStream.getAudioTracks()[0].stop();
   //create the wav blob and pass it on to createDownloadLink 
+  // this is for testing 
   rec.exportWAV(createDownloadLink);
+  rec.exportWAV(sendToServer); //change this to createDownloadLink for testing
 }
 
-function createDownloadLink(blob) {
+function sendToServer(blob) {
+  console.log(blob);
 	socket.emit('audio',  { audio: blob, username});
 }
 
+
+function createDownloadLink(blob) {
+  var url = URL.createObjectURL(blob);
+  var au = document.createElement('audio');
+  var li = document.createElement('li');
+  var link = document.createElement('a');
+  //add controls to the <audio> element 
+  au.controls = true;
+  au.src = url;
+  //link the a element to the blob 
+  link.href = url;
+  link.download = new Date().toISOString() + '.wav';
+  link.innerHTML = link.download;
+  //add the new audio and a elements to the li element 
+  li.appendChild(au);
+  li.appendChild(link);
+  //add the li element to the ordered list 
+  $('#audio-list')[0].appendChild(li);
+}
 
 //add events to those 3 buttons 
 recordButton.mousedown(startRecording);

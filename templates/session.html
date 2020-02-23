@@ -2,45 +2,69 @@
 <html lang="en">
 
 <head>
-	<title>Definitely a video chat app</title>
+  <title>Definitely a video chat app</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
 </head>
 
 <body>
+  <div class="container">
 
-	<div class="message_holder"></div>
-
-	<div id="welcome">
-
-		<form action="" method="POST">
-			<h1>Definitely a legit video chat app</h1>
-			<input type="text" class="username" placeholder="User Name" />
-			<input type="text" class="room" placeholder="room" />
-			<input type="submit" />
-		</form>
-	</div>
-
-
-	<div id="chatUI" hidden>
-		<div class="camera" >
-			<video id="video" hidden>Video stream not available.</video>
-			<button id="startbutton">Take photo</button>
-			<button id="stopbutton">Stop taking photo</button>
-		</div>
-		<canvas id="canvas" height="100">
-			<div class="output">
-				<img id="photo" alt="The screen capture will appear in this box.">
-			</div>
-		</canvas>
-    <img id="emotion" height="200px" src="/static/sad.jpg" alt="emotion placeholder">
-    <div id="controls">
-      <button id="recordButton">Press to record</button>
+    <div class="message_holder"></div>
+    
+    <div id="welcome" class="jumbotron">
+      
+      <form action="" method="POST">
+        <h1>Definitely a legit video chat app</h1>
+        <div class="form-group">
+          <input type="text" class="username form-control" placeholder="User Name" />
+        </div>
+        <div class="form-group">
+          <input type="text" class="room form-control" placeholder="room" />
+        </div>
+        <input class="form-control btn btn-primary" type="submit" />
+      </form>
     </div>
-	</div>
+    
+    
+    <div id="chatUI" class="jumbotron" hidden>
+      <div class="row">
+        <div class="camera" >
+          <video id="video" hidden>Video stream not available.</video>
+          <button class="btn btn-secondary" id="startbutton">Start chat</button>
+          <button class="btn btn-secondary" id="stopbutton">Stop chat</button>
+        </div>
+      </div>
+      <div class="row">
+
+        <canvas id="canvas" height="100px">
+          <div class="output">
+            <img id="photo" alt="The screen capture will appear in this box.">
+          </div>
+        </canvas>
+      </div>
+        
+      <div class="row">
+
+        <img id="emotion" height="300px" src="/static/sad.jpg" alt="emotion placeholder">
+
+      </div>
+      <div class="row">
+        <div id="controls">
+          <button class="btn btn-primary" id="recordButton">Press to record</button>
+        </div>
+      </div>
+      <div class="row">
+        <ul id="audio-list" class="bg-light overflow-auto"></ul>
+      </div>
+    </div>
+
+  </div>
 	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
   <script src="https://cdn.rawgit.com/mattdiamond/Recorderjs/08e7abd9/dist/recorder.js"></script>
-
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 	<script>
 
 		// The width and height of the captured photo. We will set the
@@ -72,7 +96,7 @@
 			photo = document.getElementById('photo');
 			startbutton = document.getElementById('startbutton');
 			stopbutton = document.getElementById('stopbutton');
-
+      startbutton.disabled = true;
 
 			navigator.mediaDevices.getUserMedia({ video: true, audio: false })
 				.then(function (stream) {
@@ -105,7 +129,6 @@
 			startbutton.addEventListener('click', function (ev) {
 				startChat();
 				console.log(ev);
-				startbutton.disabled = true;
 				ev.preventDefault();
 			}, false);
 
@@ -145,7 +168,8 @@
 
 		function stopChat(){
 			if (intervalId !== null){
-			clearInterval(intervalId);
+        clearInterval(intervalId);
+        startbutton.disabled = false;
 			}
 		}
 		function takepicture() {
@@ -156,7 +180,8 @@
 				context.drawImage(video, 0, 0, width, height);
 
 				var data = canvas.toDataURL('image/png');
-				photo.setAttribute('src', data);
+        photo.setAttribute('src', data);
+        console.log(data);
 				socket.emit('photo', { image: true, photo: data.toString('base64'), username: username});
 			} else {
 				clearphoto();
@@ -166,7 +191,8 @@
 
 	<script type="text/javascript">
 		var socket = io.connect('http://' + document.domain + ':' + location.port);
-		var chatUI = $('#chatUI')[0];
+    var chatUI = $('#chatUI')[0];
+    var welcome = $('#welcome')[0];
 		var username;
 		var form = $('form').on('submit', function (e) {
 			e.preventDefault()
@@ -181,17 +207,36 @@
 			socket.on('photo result', function (msg) {
 				console.log(msg)
 				if (msg.username !== username){
+          if (!msg.emotion) {
+            msg.emotion = "Neutral"
+          }
 					currentEmotion = '/static/resized_'+ msg.emotion.toLowerCase() + '.png';
 					emotion.src = currentEmotion;
 				}
 			});
+			socket.on('audio result', function (data) {
+				console.log(data)
+				if (data.username !== username){
+          var li = document.createElement('li');
+          var au = document.createElement('audio');
+          var p = document.createElement('p');
+          //add controls to the <audio> element 
+          au.controls = true;
+          au.src = data.audio;
+          p.innerText = data.text;
+          //add the new audio and a elements to the li element 
+          li.appendChild(au);
+          li.appendChild(p)
+          $('#audio-list')[0].appendChild(li);
+				}
+			});
 			socket.on('message', function (msg) {
 				console.log(msg)
-				$('div.message_holder').append('<div><b style="color: #000">' + msg.type + '</b> ' + msg.content + '</div>')
+        $('div.message_holder').append('<div><b style="color: #000">' + msg.type + '</b> ' + msg.content + '</div>')
 			});
-			this.hidden = true;
+			welcome.hidden = true;
 			chatUI.hidden = false;
-			startup();
+			startChat();
 		});
 
 	</script>
