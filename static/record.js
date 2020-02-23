@@ -1,36 +1,36 @@
-//new audio context to help us record 
 window.onload = function() {
   var recordButton = $("#recordButton");
   var gumStream;
-  //stream from getUserMedia() 
+  //stream from getUserMedia()
   var rec;
-  //Recorder.js object 
+  //Recorder.js object
   var input;
-  //MediaStreamAudioSourceNode we'll be recording 
-  // shim for AudioContext when it's not avb. 
+  //MediaStreamAudioSourceNode we'll be recording
+  // shim for AudioContext when it's not avb.
   var AudioContext = window.AudioContext || window.webkitAudioContext;
-  var audioContext = new AudioContext;
-
+  var audioContext;
   var constraints = {
     audio: true,
     video: false
-  } 
+  }
 
-  function startRecording() { 
+  function startRecording() {
     console.log("recordButton pressed");
     recordButton.text("Release to stop recording");
-    
+
     navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
-      console.log("getUserMedia() success, stream created, initializing Recorder.js ..."); 
+      console.log("getUserMedia() success, stream created, initializing Recorder.js ...");
       /* assign to gumStream for later use */
       gumStream = stream;
+      audioContext = new AudioContext;
+
       /* use the stream */
       input = audioContext.createMediaStreamSource(stream);
       /* Create the Recorder object and configure to record mono sound (1 channel) Recording 2 channels will double the file size */
       rec = new Recorder(input, {
           numChannels: 1
-      }) 
-      //start the recording process 
+      })
+      //start the recording process
       rec.record()
       console.log("Recording started");
     });
@@ -40,10 +40,10 @@ window.onload = function() {
     console.log("startButton released");
     recordButton.text("Press to record");
 
-    rec.stop(); //stop microphone access 
+    rec.stop(); //stop microphone access
     gumStream.getAudioTracks()[0].stop();
-    //create the wav blob and pass it on to createDownloadLink 
-    // this is for testing 
+    //create the wav blob and pass it on to createDownloadLink
+    // this is for testing
     rec.exportWAV(createDownloadLink);
     rec.exportWAV(sendToServer); //change this to createDownloadLink for testing
   }
@@ -59,21 +59,21 @@ window.onload = function() {
     var au = document.createElement('audio');
     var li = document.createElement('li');
     var link = document.createElement('a');
-    //add controls to the <audio> element 
+    //add controls to the <audio> element
     au.controls = true;
     au.src = url;
-    //link the a element to the blob 
+    //link the a element to the blob
     link.href = url;
     link.download = new Date().toISOString() + '.wav';
     link.innerHTML = link.download;
-    //add the new audio and a elements to the li element 
+    //add the new audio and a elements to the li element
     li.appendChild(au);
     li.appendChild(link);
-    //add the li element to the ordered list 
+    //add the li element to the ordered list
     $('#audio-list')[0].appendChild(li);
   }
 
-  //add events to those 3 buttons 
+  //add events to those 3 buttons
   recordButton.mousedown(startRecording);
   recordButton.mouseup(stopRecording);
 

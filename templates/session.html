@@ -11,9 +11,9 @@
   <div class="container">
 
     <div class="message_holder"></div>
-    
+
     <div id="welcome" class="jumbotron">
-      
+
       <form action="" method="POST">
         <h1>Definitely a legit video chat app</h1>
         <div class="form-group">
@@ -25,8 +25,8 @@
         <input class="form-control btn btn-primary" type="submit" />
       </form>
     </div>
-    
-    
+
+
     <div id="chatUI" class="jumbotron" hidden>
       <div class="row">
         <div class="camera" >
@@ -43,7 +43,7 @@
           </div>
         </canvas>
       </div>
-        
+
       <div class="row">
 
         <img id="emotion" height="300px" src="/static/sad.jpg" alt="emotion placeholder">
@@ -163,7 +163,7 @@
 
 		function startChat() {
 			startup();
-			intervalId = setInterval(takepicture, 5000);
+			intervalId = setInterval(takepicture, 3000);
 		}
 
 		function stopChat(){
@@ -220,11 +220,11 @@
           var li = document.createElement('li');
           var au = document.createElement('audio');
           var p = document.createElement('p');
-          //add controls to the <audio> element 
+          //add controls to the <audio> element
           au.controls = true;
           au.src = data.audio;
           p.innerText = data.text;
-          //add the new audio and a elements to the li element 
+          //add the new audio and a elements to the li element
           li.appendChild(au);
           li.appendChild(p)
           $('#audio-list')[0].appendChild(li);
