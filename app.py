@@ -45,7 +45,8 @@ def handle_photo_event(data, methods=['GET', 'POST']):
 
 @socketio.on('audio')
 def handle_audio_event(data, methods=['GET', 'POST']):
-    print("received audio ", data['username'])
+    print("received audio from ", data['username'])
+    print(data['audio'])
     # TODO: do audio processing here
     newAudio = data["audio"] # this should be computer generated voice
     text = "David sucks ass" # this should be NLP text
